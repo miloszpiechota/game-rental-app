@@ -153,6 +153,17 @@ AI_CONTEXT.md
 - `k8s/04-backend.yaml` - FastAPI Deployment i Service,
 - `k8s/05-frontend.yaml` - Nginx + React Deployment i NodePort Service.
 
+## CI/CD
+
+Projekt zawiera workflowy GitHub Actions w katalogu `.github/workflows/`.
+
+- `ci.yml` uruchamia się dla pull requestów oraz pushy do `main` i gałęzi `codex/**`. Sprawdza testy frontendowe, build React/Vite, testy backendu, kompilację kodu Python oraz poprawność budowania obrazów Docker.
+- `cd.yml` uruchamia się po pushu do `main` albo ręcznie przez `workflow_dispatch`. Najpierw wykonuje testy i build, a dopiero potem buduje obrazy backendu i frontendu oraz publikuje je do GitHub Container Registry:
+  - `ghcr.io/<owner>/<repo>/backend:latest`,
+  - `ghcr.io/<owner>/<repo>/frontend:latest`.
+
+W lokalnym Minikube można dalej korzystać z obrazów budowanych lokalnie zgodnie z instrukcją powyżej. Obrazy z GHCR są przygotowane pod późniejsze wdrożenie z rejestru.
+
 ## AI / LLM
 
 W projekcie korzystano z pomocy modelu LLM do wygenerowania i iteracyjnej modyfikacji:

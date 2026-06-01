@@ -13,15 +13,22 @@ describe("rental rules", () => {
   });
 
   it("creates due date from selected rental length", () => {
-    const now = new Date("2026-05-01T10:00:00.000Z");
-    const dueDate = getDueDateFromNow(14, now);
+    const now = new Date(2026, 4, 1, 10, 0, 0, 0);
+    const dueDate = new Date(getDueDateFromNow(14, now));
 
-    expect(dueDate).toBe("2026-05-15T21:59:59.999Z");
+    expect(dueDate.getFullYear()).toBe(2026);
+    expect(dueDate.getMonth()).toBe(4);
+    expect(dueDate.getDate()).toBe(15);
+    expect(dueDate.getHours()).toBe(23);
+    expect(dueDate.getMinutes()).toBe(59);
+    expect(dueDate.getSeconds()).toBe(59);
+    expect(dueDate.getMilliseconds()).toBe(999);
   });
 
   it("calculates days left before due date", () => {
-    const now = new Date("2026-05-10T08:00:00.000Z");
-    const summary = getRentalSummary("2026-05-17T21:59:59.999Z", now);
+    const now = new Date(2026, 4, 10, 8, 0, 0, 0);
+    const dueDate = new Date(2026, 4, 17, 23, 59, 59, 999);
+    const summary = getRentalSummary(dueDate, now);
 
     expect(summary.daysLeft).toBe(7);
     expect(summary.isOverdue).toBe(false);
@@ -29,8 +36,9 @@ describe("rental rules", () => {
   });
 
   it("calculates overdue penalty", () => {
-    const now = new Date("2026-05-10T08:00:00.000Z");
-    const summary = getRentalSummary("2026-05-06T21:59:59.999Z", now);
+    const now = new Date(2026, 4, 10, 8, 0, 0, 0);
+    const dueDate = new Date(2026, 4, 6, 23, 59, 59, 999);
+    const summary = getRentalSummary(dueDate, now);
 
     expect(summary.overdueDays).toBe(4);
     expect(summary.isOverdue).toBe(true);
