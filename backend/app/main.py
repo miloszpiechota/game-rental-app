@@ -1,3 +1,5 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from time import sleep
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,23 +11,8 @@ from .seed import seed_demo_data
 
 settings = get_settings()
 
-app = FastAPI(title=settings.app_name)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origin_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(auth.router, prefix=settings.api_prefix)
-app.include_router(games.router, prefix=settings.api_prefix)
-app.include_router(rentals.router, prefix=settings.api_prefix)
-
-
-@app.on_event("startup")
-def startup() -> None:
+def initialize_database() -> None:
     last_error: Exception | None = None
 
     for _attempt in range(12):
@@ -46,6 +33,27 @@ def startup() -> None:
             seed_demo_data(db)
         finally:
             db.close()
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    initialize_database()
+    yield
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router, prefix=settings.api_prefix)
+app.include_router(games.router, prefix=settings.api_prefix)
+app.include_router(rentals.router, prefix=settings.api_prefix)
 
 
 @app.get(f"{settings.api_prefix}/health")

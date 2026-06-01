@@ -175,11 +175,18 @@ npm test
 npm run build
 ```
 
-Backend - podstawowe sprawdzenie składni:
+Backend:
 
 ```bash
+python -m pip install -r backend/requirements-dev.txt
+python -m pytest backend/tests -q
 python -m compileall backend/app
 ```
+
+Zakres testów:
+
+- backend: hashowanie haseł, tokeny, rejestracja, logowanie, `me`, rola pracownika, tworzenie/usuwanie gier, blokada usunięcia wypożyczonej gry, wypożyczenie, zwrot i kara za opóźnienie,
+- frontend: reguły wypożyczeń, klient API, karta gry, podgląd gry przez kliknięcie, formularz panelu pracownika i walidacja.
 
 ## Termin oddania
 
