@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: gralnia
+data:
+  CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
+  SEED_DEMO_DATA: "true"
