@@ -1,6 +1,65 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Frontend build output
+dist/
+build/
+.vite/
+
+# Test and coverage output
+coverage/
+.nyc_output/
+htmlcov/
+.pytest_cache/
+.vitest/
+
+# Environment files
 .env
-.env.local
+.env.*
+!.env.example
+!backend/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.python-version
+.venv/
+venv/
+env/
+ENV/
+pip-wheel-metadata/
+
+# Local databases and runtime files
+*.db
+*.sqlite
+*.sqlite3
+gralnia.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Docker and generated local artifacts
+docker-compose.override.yml
+*.tar
+
+# IDE/editor
+.idea/
+.vscode/
+*.code-workspace
+
+# OS files
 .DS_Store
-coverage
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
