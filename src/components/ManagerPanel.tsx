@@ -1,7 +1,6 @@
 import { FormEvent, useState } from "react";
 import { PlusCircle } from "lucide-react";
 import type { BoardGame, Complexity } from "../types";
-import { coverImages } from "../assets/covers";
 
 interface ManagerPanelProps {
   onAddGame: (game: BoardGame) => void;
@@ -9,14 +8,14 @@ interface ManagerPanelProps {
 
 type FormErrors = Partial<
   Record<
-    "title" | "category" | "complexity" | "players" | "durationMinutes" | "tags" | "description",
+    "title" | "cover" | "category" | "complexity" | "players" | "durationMinutes" | "tags" | "description",
     string
   >
 >;
 
 const categoryOptions = ["Familijne", "Strategiczne", "Kooperacyjne", "Ekonomiczne", "Taktyczne", "Przygodowe"];
 const complexityOptions: Complexity[] = ["familijna", "średnia", "ekspercka"];
-const coverKeys = Object.keys(coverImages) as Array<keyof typeof coverImages>;
+const imageUrlPattern = /\.(jpe?g|png|webp|avif|gif)$/i;
 
 const slugify = (value: string) =>
   value
@@ -33,8 +32,18 @@ const parseTags = (value: string) =>
     .map((tag) => tag.trim())
     .filter(Boolean);
 
+const isValidImageUrl = (value: string) => {
+  try {
+    const parsedUrl = new URL(value);
+    return ["http:", "https:"].includes(parsedUrl.protocol) && Boolean(parsedUrl.hostname) && imageUrlPattern.test(parsedUrl.pathname);
+  } catch {
+    return false;
+  }
+};
+
 export function ManagerPanel({ onAddGame }: ManagerPanelProps) {
   const [title, setTitle] = useState("");
+  const [coverUrl, setCoverUrl] = useState("");
   const [category, setCategory] = useState(categoryOptions[0]);
   const [complexity, setComplexity] = useState<Complexity>("familijna");
   const [playersMin, setPlayersMin] = useState(2);
@@ -47,11 +56,16 @@ export function ManagerPanel({ onAddGame }: ManagerPanelProps) {
   const validate = () => {
     const nextErrors: FormErrors = {};
     const normalizedTitle = title.trim();
+    const normalizedCoverUrl = coverUrl.trim();
     const normalizedDescription = description.trim();
     const parsedTags = parseTags(tags);
 
     if (normalizedTitle.length < 3 || normalizedTitle.length > 80) {
       nextErrors.title = "Tytuł musi mieć od 3 do 80 znaków.";
+    }
+
+    if (!isValidImageUrl(normalizedCoverUrl)) {
+      nextErrors.cover = "Podaj poprawny URL obrazu: jpg, jpeg, png, webp, avif albo gif.";
     }
 
     if (!categoryOptions.includes(category)) {
@@ -91,6 +105,7 @@ export function ManagerPanel({ onAddGame }: ManagerPanelProps) {
     return {
       isValid: Object.keys(nextErrors).length === 0,
       normalizedTitle,
+      normalizedCoverUrl,
       normalizedDescription,
       parsedTags
     };
@@ -105,7 +120,6 @@ export function ManagerPanel({ onAddGame }: ManagerPanelProps) {
       return;
     }
 
-    const coverKey = coverKeys[Math.floor(Math.random() * coverKeys.length)];
     const nextGame: BoardGame = {
       id: `${slugify(validation.normalizedTitle)}-${Date.now()}`,
       title: validation.normalizedTitle,
@@ -115,13 +129,14 @@ export function ManagerPanel({ onAddGame }: ManagerPanelProps) {
       playersMax,
       durationMinutes,
       rating: 4.0,
-      cover: coverImages[coverKey],
+      cover: validation.normalizedCoverUrl,
       description: validation.normalizedDescription,
       tags: validation.parsedTags
     };
 
     onAddGame(nextGame);
     setTitle("");
+    setCoverUrl("");
     setTags("");
     setDescription("");
     setPlayersMin(2);
@@ -153,6 +168,21 @@ export function ManagerPanel({ onAddGame }: ManagerPanelProps) {
             onChange={(event) => setTitle(event.target.value)}
           />
           {errors.title && <span className="field-error">{errors.title}</span>}
+        </label>
+
+        <label className="form-label">
+          Adres URL okladki
+          <input
+            className="form-control"
+            type="url"
+            placeholder="https://images.pexels.com/photos/8111365/pexels-photo-8111365.jpeg"
+            value={coverUrl}
+            maxLength={500}
+            required
+            aria-invalid={Boolean(errors.cover)}
+            onChange={(event) => setCoverUrl(event.target.value)}
+          />
+          {errors.cover && <span className="field-error">{errors.cover}</span>}
         </label>
 
         <div className="manager-form-row">

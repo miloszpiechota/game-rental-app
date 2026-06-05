@@ -12,7 +12,7 @@ const game: BoardGame = {
   playersMax: 4,
   durationMinutes: 45,
   rating: 4.4,
-  cover: "data:image/svg+xml;utf8,<svg />",
+  cover: "https://images.pexels.com/photos/8111365/pexels-photo-8111365.jpeg",
   description: "Krótki opis testowej gry planszowej.",
   tags: ["rodzinna", "karty"]
 };

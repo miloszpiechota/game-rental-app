@@ -13,6 +13,7 @@ spec:
       labels:
         app: backend
     spec:
+      serviceAccountName: backend-reader
       containers:
         - name: backend
           image: game-rental-backend:latest

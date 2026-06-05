@@ -120,6 +120,172 @@ Adres IP można sprawdzić:
 minikube ip
 ```
 
+## Szybki redeploy po zmianach
+
+Po zmianach w kodzie frontendu, backendu albo manifestach Kubernetes najprosciej przebudowac i odswiezyc aplikacje jednym poleceniem:
+
+```powershell
+npm run k8s:redeploy
+```
+
+To polecenie uruchamia skrypt [scripts/redeploy-minikube.ps1](scripts/redeploy-minikube.ps1), ktory:
+
+- uruchamia Minikube,
+- buduje obrazy `game-rental-backend:latest` i `game-rental-frontend:latest` bezposrednio w Minikube,
+- wykonuje `kubectl apply -f k8s/`,
+- restartuje Deploymenty `backend` i `frontend`,
+- czeka na zakonczenie rolloutow,
+- pokazuje aktualne pody i serwisy.
+
+Jezeli po redeployu chcesz od razu uruchomic frontend przez port-forward:
+
+```powershell
+npm run k8s:redeploy:open
+```
+
+Frontend bedzie dostepny pod:
+
+```text
+http://127.0.0.1:8080
+```
+
+Terminal z `k8s:redeploy:open` musi pozostac otwarty, bo `kubectl port-forward` dziala tylko tak dlugo, jak dziala to polecenie.
+
+Skrypt mozna tez uruchomic bezposrednio:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/redeploy-minikube.ps1
+```
+
+Dodatkowe opcje:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/redeploy-minikube.ps1 -SkipMinikubeStart
+powershell -ExecutionPolicy Bypass -File scripts/redeploy-minikube.ps1 -SkipBuild
+powershell -ExecutionPolicy Bypass -File scripts/redeploy-minikube.ps1 -PortForward -FrontendPort 8081
+```
+
+## Poprawne uruchomienie aplikacji w Kubernetes
+
+Ponizsze komendy uruchamiaja cala aplikacje `game-rental-app` w Minikube: MariaDB, backend FastAPI i frontend React/Nginx.
+
+1. Wejdz do katalogu projektu:
+
+```powershell
+cd C:\Users\Milosz\Desktop\game-rental-app
+```
+
+2. Uruchom Minikube:
+
+```powershell
+minikube start
+```
+
+3. Skieruj lokalny Docker na srodowisko Minikube:
+
+```powershell
+& minikube -p minikube docker-env --shell powershell | Invoke-Expression
+```
+
+4. Zbuduj obrazy aplikacji:
+
+```powershell
+docker build -t game-rental-backend:latest -f backend/Dockerfile backend
+docker build -t game-rental-frontend:latest -f Dockerfile.frontend .
+```
+
+5. Wdroz manifesty Kubernetes:
+
+```powershell
+kubectl apply -f k8s/
+```
+
+6. Sprawdz, czy pody dzialaja:
+
+```powershell
+kubectl get pods -n gralnia
+```
+
+Oczekiwany wynik:
+
+```text
+backend    1/1 Running
+frontend   1/1 Running
+mariadb    1/1 Running
+```
+
+7. Sprawdz serwisy:
+
+```powershell
+kubectl get svc -n gralnia
+```
+
+Frontend powinien miec Service typu `NodePort` z portem `30080`, a backend i MariaDB powinny miec `ClusterIP`.
+
+8. Sprawdz backend:
+
+W pierwszym terminalu uruchom:
+
+```powershell
+kubectl port-forward -n gralnia svc/backend 8000:8000
+```
+
+W drugim terminalu wykonaj:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/api/health
+```
+
+9. Uruchom frontend przez port-forward:
+
+```powershell
+kubectl port-forward -n gralnia svc/frontend 8080:80
+```
+
+Zostaw terminal z `port-forward` otwarty i wejdz w przegladarce na:
+
+```text
+http://127.0.0.1:8080
+```
+
+Jezeli port `8080` jest zajety, uzyj innego portu lokalnego:
+
+```powershell
+kubectl port-forward -n gralnia svc/frontend 8081:80
+```
+
+Wtedy otworz:
+
+```text
+http://127.0.0.1:8081
+```
+
+10. Alternatywnie otworz frontend przez NodePort:
+
+```powershell
+minikube service frontend -n gralnia
+```
+
+Albo pobierz sam adres:
+
+```powershell
+minikube service frontend -n gralnia --url
+```
+
+W tym projekcie frontend jest wystawiony jako:
+
+```text
+http://<minikube-ip>:30080
+```
+
+Adres IP Minikube sprawdzisz komenda:
+
+```powershell
+minikube ip
+```
+
+Najczestszy problem: po zamknieciu terminala z `kubectl port-forward` adres `http://127.0.0.1:8080` przestaje dzialac. Terminal z port-forward musi byc caly czas otwarty.
+
 ## Struktura projektu
 
 ```text
@@ -148,6 +314,7 @@ AI_CONTEXT.md
 
 - `k8s/00-namespace.yaml` - namespace `gralnia`,
 - `k8s/01-configmap.yaml` - konfiguracja aplikacji,
+- `k8s/02-rbac.yaml` - ServiceAccount, Role i RoleBinding dla backendu,
 - `k8s/02-secret.yaml` - hasła i connection string,
 - `k8s/03-mariadb.yaml` - MariaDB, PVC i Service,
 - `k8s/04-backend.yaml` - FastAPI Deployment i Service,

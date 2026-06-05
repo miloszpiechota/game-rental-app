@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from urllib.parse import quote
 from sqlalchemy.orm import Session
 from .models import Game, Rental, User
 from .security import hash_password
@@ -10,25 +9,12 @@ DEMO_USER_ID = "u-demo"
 DEMO_EMAIL = "demo@gralnia.pl"
 DEMO_PASSWORD = "demo123"
 
-
-def cover_svg(label: str, start: str, end: str, accent: str) -> str:
-    svg = f"""
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 264">
-      <defs>
-        <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0" stop-color="{start}"/>
-          <stop offset="1" stop-color="{end}"/>
-        </linearGradient>
-      </defs>
-      <rect width="352" height="264" rx="18" fill="url(#bg)"/>
-      <rect x="24" y="24" width="304" height="216" rx="16" fill="none" stroke="#fff" stroke-width="2" opacity=".28"/>
-      <circle cx="246" cy="92" r="38" fill="{accent}" opacity=".9"/>
-      <rect x="58" y="126" width="86" height="86" rx="12" fill="#fff" opacity=".72"/>
-      <rect x="156" y="126" width="86" height="86" rx="12" fill="{accent}" opacity=".68"/>
-      <text x="34" y="62" font-family="Arial" font-size="24" font-weight="800" fill="#fff">{label}</text>
-    </svg>
-    """
-    return f"data:image/svg+xml;utf8,{quote(svg)}"
+COVER_IMAGES = {
+    "galaxy": "https://images.pexels.com/photos/8111365/pexels-photo-8111365.jpeg",
+    "castle": "https://images.pexels.com/photos/27219523/pexels-photo-27219523.jpeg",
+    "cafe": "https://images.pexels.com/photos/7594348/pexels-photo-7594348.jpeg",
+    "rail": "https://images.pexels.com/photos/9501388/pexels-photo-9501388.jpeg",
+}
 
 
 SEED_GAMES = [
@@ -41,7 +27,7 @@ SEED_GAMES = [
         "players_max": 4,
         "duration_minutes": 90,
         "rating": 4.8,
-        "cover": cover_svg("GALAXY", "#16324f", "#5b2a86", "#f6bd60"),
+        "cover": COVER_IMAGES["galaxy"],
         "description": "Rozbudowa floty, handel surowcami i rywalizacja o sektory mapy.",
         "tags_csv": tags_to_csv(["kosmos", "ekonomia", "mapa"]),
     },
@@ -54,7 +40,7 @@ SEED_GAMES = [
         "players_max": 5,
         "duration_minutes": 120,
         "rating": 4.7,
-        "cover": cover_svg("CASTLE", "#37505c", "#7a4f35", "#e9c46a"),
+        "cover": COVER_IMAGES["castle"],
         "description": "Planowanie tur, zarządzanie pracownikami i budowa zimowego królestwa.",
         "tags_csv": tags_to_csv(["worker placement", "budowanie", "zasoby"]),
     },
@@ -67,7 +53,7 @@ SEED_GAMES = [
         "players_max": 6,
         "duration_minutes": 35,
         "rating": 4.2,
-        "cover": cover_svg("CAFE", "#b65f35", "#2d6a4f", "#fff3b0"),
+        "cover": COVER_IMAGES["cafe"],
         "description": "Szybka gra karciana o obsłudze klientów i blokowaniu przeciwników.",
         "tags_csv": tags_to_csv(["karty", "szybka", "rodzinna"]),
     },
@@ -80,7 +66,7 @@ SEED_GAMES = [
         "players_max": 5,
         "duration_minutes": 45,
         "rating": 4.5,
-        "cover": cover_svg("RAIL", "#264653", "#8a5a44", "#f4a261"),
+        "cover": COVER_IMAGES["rail"],
         "description": "Budowanie połączeń, kompletowanie kontraktów i walka o najlepsze trasy.",
         "tags_csv": tags_to_csv(["trasy", "rodzinna", "mapa"]),
     },
@@ -101,8 +87,11 @@ def seed_demo_data(db: Session) -> None:
         )
 
     for game_data in SEED_GAMES:
-        if not db.get(Game, game_data["id"]):
+        existing_game = db.get(Game, game_data["id"])
+        if not existing_game:
             db.add(Game(**game_data))
+        elif existing_game.cover.startswith("data:image/svg+xml"):
+            existing_game.cover = game_data["cover"]
 
     db.commit()
 

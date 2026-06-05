@@ -8,6 +8,9 @@ from app.security import hash_password
 from app.utils import tags_to_csv
 
 
+COVER_URL = "https://images.pexels.com/photos/8111365/pexels-photo-8111365.jpeg"
+
+
 def create_staff(db: Session) -> User:
     staff = User(
         id="u-staff",
@@ -31,7 +34,7 @@ def create_game(db: Session, game_id: str = "test-game") -> Game:
         players_max=4,
         duration_minutes=45,
         rating=4.3,
-        cover="cover",
+        cover=COVER_URL,
         description="Opis testowej gry planszowej do wypożyczalni.",
         tags_csv=tags_to_csv(["rodzinna", "karty"]),
     )
@@ -79,7 +82,7 @@ def test_staff_can_create_and_delete_available_game(client: TestClient, db_sessi
         "playersMax": 5,
         "durationMinutes": 90,
         "rating": 4.0,
-        "cover": "cover",
+        "cover": COVER_URL,
         "description": "Opis nowej gry testowej dla panelu pracownika.",
         "tags": ["strategia", "test"],
     }
@@ -111,7 +114,7 @@ def test_client_cannot_create_game(client: TestClient) -> None:
             "playersMax": 4,
             "durationMinutes": 40,
             "rating": 4.0,
-            "cover": "cover",
+            "cover": COVER_URL,
             "description": "Opis gry, której klient nie powinien móc dodać.",
             "tags": ["test"],
         },

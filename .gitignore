@@ -6,6 +6,9 @@ dist/
 build/
 .vite/
 
+# Lab files
+lab/
+
 # Test and coverage output
 coverage/
 .nyc_output/
