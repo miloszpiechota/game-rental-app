@@ -172,7 +172,7 @@ Ponizsze komendy uruchamiaja cala aplikacje `game-rental-app` w Minikube: MariaD
 1. Wejdz do katalogu projektu:
 
 ```powershell
-cd C:\Users\Milosz\Desktop\game-rental-app
+cd path\to\game-rental-app
 ```
 
 2. Uruchom Minikube:
@@ -333,16 +333,24 @@ W lokalnym Minikube można dalej korzystać z obrazów budowanych lokalnie zgodn
 
 ## AI / LLM
 
-W projekcie korzystano z pomocy modelu LLM do wygenerowania i iteracyjnej modyfikacji:
+W projekcie korzystano z pomocy modelu LLM jako narzędzia pomocniczego przy konsultowaniu rozwiązań, porządkowaniu kodu i iteracyjnej modyfikacji:
 
 - komponentów React,
 - backendu FastAPI,
-- manifestów Kubernetes,
+- manifestów KuberneWprowadzone treści były następnie modyfikowane pod wymagania projektu: role użytkowników, blokada usuwania wypożyczonych gier, walidacja formularzy, integracja API oraz instrukcja Minikube.tes,
 - konfiguracji Docker/Nginx,
 - dokumentacji README,
 - pliku kontekstu projektu.
 
-Opis kontekstu i zakres użycia AI znajduje się w [AI_CONTEXT.md](AI_CONTEXT.md). Wprowadzone treści były następnie modyfikowane pod wymagania projektu: role użytkowników, blokada usuwania wypożyczonych gier, walidacja formularzy, integracja API oraz instrukcja Minikube.
+Opis kontekstu i zakres użycia AI znajduje się w [AI_CONTEXT.md](AI_CONTEXT.md). Plik główny odsyła też do osobnych kontekstów agentów:
+
+- [AI_CONTEXT_FRONTEND_STYLE.md](AI_CONTEXT_FRONTEND_STYLE.md) - frontend, stylistyka i UX,
+- [AI_CONTEXT_BACKEND_FASTAPI.md](AI_CONTEXT_BACKEND_FASTAPI.md) - backend FastAPI i integracja API,
+- [AI_CONTEXT_FULLSTACK_MINIKUBE.md](AI_CONTEXT_FULLSTACK_MINIKUBE.md) - Docker, Nginx, Kubernetes i Minikube,
+- [AI_CONTEXT_SECURITY_AUDIT.md](AI_CONTEXT_SECURITY_AUDIT.md) - audyt bezpieczeństwa,
+- [AI_CONTEXT_TESTING.md](AI_CONTEXT_TESTING.md) - testowanie i walidacja.
+
+
 
 ## Testy i build
 
@@ -366,6 +374,4 @@ Zakres testów:
 - backend: hashowanie haseł, tokeny, rejestracja, logowanie, `me`, rola pracownika, tworzenie/usuwanie gier, blokada usunięcia wypożyczonej gry, wypożyczenie, zwrot i kara za opóźnienie,
 - frontend: reguły wypożyczeń, klient API, karta gry, podgląd gry przez kliknięcie, formularz panelu pracownika i walidacja.
 
-## Termin oddania
 
-Zgodnie z wymaganiami laboratorium projekt należy przesłać do `05.06.2026 23:59`.
